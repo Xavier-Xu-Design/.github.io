@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年日历待办表格</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>2025年日历待办表格</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>星期</th>
+                <th>语文</th>
+                <th>数学</th>
+                <th>英语</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 生成2025年1月到12月的日历 -->
+            <script>
+                const months = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+                const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; // 2025年不是闰年
+                const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+
+                let tableBody = document.querySelector("tbody");
+
+                for (let month = 0; month < 12; month++) {
+                    // 添加月份标题
+                    let monthRow = document.createElement("tr");
+                    let monthCell = document.createElement("td");
+                    monthCell.colSpan = 5;
+                    monthCell.textContent = months[month];
+                    monthCell.style.backgroundColor = "#e0e0e0";
+                    monthCell.style.fontWeight = "bold";
+                    monthRow.appendChild(monthCell);
+                    tableBody.appendChild(monthRow);
+
+                    for (let day = 1; day <= daysInMonth[month]; day++) {
+                        let date = new Date(2025, month, day);
+                        let weekday = weekdays[date.getDay()];
+
+                        let row = document.createElement("tr");
+                        let dateCell = document.createElement("td");
+                        dateCell.textContent = `${month + 1}月${day}日`;
+                        row.appendChild(dateCell);
+
+                        let weekdayCell = document.createElement("td");
+                        weekdayCell.textContent = `星期${weekday}`;
+                        row.appendChild(weekdayCell);
+
+                        for (let i = 0; i < 3; i++) {
+                            let taskCell = document.createElement("td");
+                            taskCell.innerHTML = `<input type="checkbox">`;
+                            row.appendChild(taskCell);
+                        }
+
+                        tableBody.appendChild(row);
+                    }
+                }
+            </script>
+        </tbody>
+    </table>
+</body>
+</html>
