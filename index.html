@@ -18,6 +18,9 @@
             background-color: #f2f2f2;
         }
     </style>
+    <!-- 引入 Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"></script>
 </head>
 <body>
     <h1>2025年日历待办表格</h1>
@@ -34,11 +37,44 @@
         <tbody>
             <!-- 生成2025年1月到12月的日历 -->
             <script>
+                // Firebase 配置
+               const firebaseConfig = {
+  apiKey: "AIzaSyAAY5cnbWhvBBlIGFbLLewqWSKbUR1rpuA",
+  authDomain: "calendar2025-46e37.firebaseapp.com",
+  projectId: "calendar2025-46e37",
+  storageBucket: "calendar2025-46e37.firebasestorage.app",
+  messagingSenderId: "366432331348",
+  appId: "1:366432331348:web:e00aca4acd9db3a630afc1",
+  measurementId: "G-0NWNX8XJJF"
+};
+
+                // 初始化 Firebase
+                const app = firebase.initializeApp(firebaseConfig);
+                const db = firebase.firestore();
+
                 const months = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
                 const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; // 2025年不是闰年
                 const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
 
                 let tableBody = document.querySelector("tbody");
+
+                // 从 Firestore 加载已保存的勾选状态
+                async function loadCheckboxState(date, task) {
+                    const docRef = db.collection("todos").doc(date);
+                    const doc = await docRef.get();
+                    if (doc.exists) {
+                        return doc.data()[task] || false;
+                    }
+                    return false;
+                }
+
+                // 保存勾选状态到 Firestore
+                function saveCheckboxState(date, task, isChecked) {
+                    const docRef = db.collection("todos").doc(date);
+                    docRef.set({
+                        [task]: isChecked
+                    }, { merge: true });
+                }
 
                 for (let month = 0; month < 12; month++) {
                     // 添加月份标题
@@ -53,6 +89,7 @@
 
                     for (let day = 1; day <= daysInMonth[month]; day++) {
                         let date = new Date(2025, month, day);
+                        let dateString = `${month + 1}-${day}`; // 用于存储的唯一键
                         let weekday = weekdays[date.getDay()];
 
                         let row = document.createElement("tr");
@@ -64,11 +101,19 @@
                         weekdayCell.textContent = `星期${weekday}`;
                         row.appendChild(weekdayCell);
 
-                        for (let i = 0; i < 3; i++) {
+                        // 语文、数学、英语的复选框
+                        const tasks = ["语文", "数学", "英语"];
+                        tasks.forEach(async (task, index) => {
                             let taskCell = document.createElement("td");
-                            taskCell.innerHTML = `<input type="checkbox">`;
+                            let checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.checked = await loadCheckboxState(dateString, task); // 加载已保存的状态
+                            checkbox.addEventListener("change", () => {
+                                saveCheckboxState(dateString, task, checkbox.checked); // 保存状态
+                            });
+                            taskCell.appendChild(checkbox);
                             row.appendChild(taskCell);
-                        }
+                        });
 
                         tableBody.appendChild(row);
                     }
